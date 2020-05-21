@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardElevation="5dp"
+        app:cardMaxElevation="5dp"
+        app:cardPreventCornerOverlap="true"
+        app:cardUseCompatPadding="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp">
+
+            <ImageView
+                android:id="@+id/iv_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:src="@drawable/picture4" />
+
+            <TextView
+                android:id="@+id/tv_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/iv_photo"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="2020"
+                android:textColor="@color/colorBlack" />
+
+            <TextView
+                android:id="@+id/tv_weather"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_date"
+                android:layout_alignStart="@id/tv_date"
+                android:layout_marginTop="5dp"
+                android:text="22℃"
+                android:textColor="@color/colorBlack" />
+
+            <ImageView
+                android:id="@+id/icon_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_weather"
+                android:layout_alignStart="@id/tv_weather"
+                android:layout_marginTop="10dp"
+                android:adjustViewBounds="true"
+                android:baselineAlignBottom="true"
+                android:maxHeight="20dp"
+                android:src="@drawable/ic_location_black" />
+
+            <TextView
+                android:id="@+id/tv_site"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/icon_location"
+                android:layout_toEndOf="@id/icon_location"
+                android:text="@string/default_site_name"
+                android:textColor="@color/colorBlack" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/icon_location"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="10dp">
+
+                <ImageView
+                    android:id="@+id/icon_collect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:maxHeight="20dp"
+                    android:src="@drawable/ic_collect" />
+
+                <TextView
+                    android:id="@+id/tv_collect_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/icon_collect"
+                    android:layout_toEndOf="@id/icon_collect"
+                    android:text="9"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="10sp"
+                    tools:ignore="SmallSp" />
+
+                <ImageView
+                    android:id="@+id/icon_praise"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_toEndOf="@id/tv_collect_count"
+                    android:adjustViewBounds="true"
+                    android:maxHeight="20dp"
+                    android:src="@drawable/ic_praise" />
+
+                <TextView
+                    android:id="@+id/tv_praise_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/icon_praise"
+                    android:layout_toEndOf="@id/icon_praise"
+                    android:text="23"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="10sp"
+                    tools:ignore="SmallSp" />
+
+                <ImageView
+                    android:id="@+id/icon_comment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_toEndOf="@id/tv_praise_count"
+                    android:adjustViewBounds="true"
+                    android:maxHeight="20dp"
+                    android:src="@drawable/ic_comment" />
+
+                <TextView
+                    android:id="@+id/tv_comment_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/icon_comment"
+                    android:layout_toEndOf="@id/icon_comment"
+                    android:text="45"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="10sp"
+                    tools:ignore="SmallSp" />
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

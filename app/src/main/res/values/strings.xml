@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Awa-Photograph</string>
+    <string name="default_site_name">Beautiful beach</string>
+    <string name="main_title">最近的打卡地推荐</string>
+    <string name="celsius">℃</string>
+</resources>
