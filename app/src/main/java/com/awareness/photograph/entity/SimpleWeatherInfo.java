@@ -6,10 +6,19 @@ public class SimpleWeatherInfo {
     private int UvIndex;
     private int windSpeed;
 
-    public SimpleWeatherInfo(long temperature, String weather, int uvIndex, int windSpeed) {
+    public void setTemperature(long temperature) {
         this.temperature = temperature;
+    }
+
+    public void setWeather(String weather) {
         this.weather = weather;
+    }
+
+    public void setUvIndex(int uvIndex) {
         UvIndex = uvIndex;
+    }
+
+    public void setWindSpeed(int windSpeed) {
         this.windSpeed = windSpeed;
     }
 

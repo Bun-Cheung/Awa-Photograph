@@ -1,101 +1,72 @@
 package com.awareness.photograph.entity;
 
 public class PhotoDetail {
-    private int photo;
-    private String date;
+    private String photoPath;
+    private long timestamp;
     private SimpleWeatherInfo weatherInfo;
-    private String site;
-    private int collectCount;
-    private int praiseCount;
-    private int commentCount;
+    private double latitude;
+    private double longitude;
+    private double lightIntensity;
+    private boolean collected;
 
-    private PhotoDetail(Builder builder) {
-        photo = builder.photo;
-        date = builder.date;
-        weatherInfo = builder.weatherInfo;
-        site = builder.site;
-        collectCount = builder.collectCount;
-        praiseCount = builder.praiseCount;
-        commentCount = builder.commentCount;
+    public boolean isInfoFilled() {
+        return (photoPath != null && weatherInfo != null && timestamp != 0 && latitude != 0
+                && longitude != 0 && lightIntensity != 0);
     }
 
-    public int getPhoto() {
-        return photo;
+    public String getPhotoPath() {
+        return photoPath;
     }
 
-    public String getDate() {
-        return date;
+    public void setPhotoPath(String photoPath) {
+        this.photoPath = photoPath;
+    }
+
+    public boolean isCollected() {
+        return collected;
+    }
+
+    public void setCollected(boolean collected) {
+        this.collected = collected;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public SimpleWeatherInfo getWeatherInfo() {
         return weatherInfo;
     }
 
-    public String getSite() {
-        return site;
+    public void setWeatherInfo(SimpleWeatherInfo weatherInfo) {
+        this.weatherInfo = weatherInfo;
     }
 
-    public int getCollectCount() {
-        return collectCount;
+    public double getLatitude() {
+        return latitude;
     }
 
-    public int getPraiseCount() {
-        return praiseCount;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
-    public int getCommentCount() {
-        return commentCount;
+    public double getLongitude() {
+        return longitude;
     }
 
-    public static final class Builder {
-        private int photo;
-        private String date;
-        private SimpleWeatherInfo weatherInfo;
-        private String site;
-        private int collectCount;
-        private int praiseCount;
-        private int commentCount;
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
-        public Builder() {
-        }
+    public double getLightIntensity() {
+        return lightIntensity;
+    }
 
-        public Builder photo(int val) {
-            photo = val;
-            return this;
-        }
-
-        public Builder date(String val) {
-            date = val;
-            return this;
-        }
-
-        public Builder weatherInfo(SimpleWeatherInfo val) {
-            weatherInfo = val;
-            return this;
-        }
-
-        public Builder site(String val) {
-            site = val;
-            return this;
-        }
-
-        public Builder collectCount(int val) {
-            collectCount = val;
-            return this;
-        }
-
-        public Builder praiseCount(int val) {
-            praiseCount = val;
-            return this;
-        }
-
-        public Builder commentCount(int val) {
-            commentCount = val;
-            return this;
-        }
-
-        public PhotoDetail build() {
-            return new PhotoDetail(this);
-        }
+    public void setLightIntensity(double lightIntensity) {
+        this.lightIntensity = lightIntensity;
     }
 }

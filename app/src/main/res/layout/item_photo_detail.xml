@@ -36,6 +36,15 @@
                 android:textColor="@color/colorBlack" />
 
             <TextView
+                android:id="@+id/tv_light_intensity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/tv_date"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/colorBlack" />
+
+            <TextView
                 android:id="@+id/tv_weather"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -58,82 +67,96 @@
                 android:src="@drawable/ic_location_black" />
 
             <TextView
-                android:id="@+id/tv_site"
+                android:id="@+id/tv_lat_lng"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@id/icon_location"
+                android:layout_marginStart="5dp"
                 android:layout_toEndOf="@id/icon_location"
                 android:text="@string/default_site_name"
                 android:textColor="@color/colorBlack" />
 
-            <RelativeLayout
+            <ImageButton
+                android:id="@+id/ib_collect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@id/icon_location"
                 android:layout_alignParentEnd="true"
-                android:layout_marginEnd="10dp">
+                android:layout_marginEnd="20dp"
+                android:adjustViewBounds="true"
+                android:background="@color/colorWhite"
+                android:maxHeight="20dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_collect_empty" />
 
-                <ImageView
-                    android:id="@+id/icon_collect"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:maxHeight="20dp"
-                    android:src="@drawable/ic_collect" />
+            <!--            <RelativeLayout-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_alignBottom="@id/icon_location"-->
+            <!--                android:layout_alignParentEnd="true"-->
+            <!--                android:layout_marginEnd="10dp">-->
 
-                <TextView
-                    android:id="@+id/tv_collect_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@id/icon_collect"
-                    android:layout_toEndOf="@id/icon_collect"
-                    android:text="9"
-                    android:textColor="@color/colorBlack"
-                    android:textSize="10sp"
-                    tools:ignore="SmallSp" />
+            <!--                <ImageView-->
+            <!--                    android:id="@+id/icon_collect"-->
+            <!--                    android:layout_width="wrap_content"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:adjustViewBounds="true"-->
+            <!--                    android:maxHeight="20dp"-->
+            <!--                    android:src="@drawable/ic_collect" />-->
 
-                <ImageView
-                    android:id="@+id/icon_praise"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_toEndOf="@id/tv_collect_count"
-                    android:adjustViewBounds="true"
-                    android:maxHeight="20dp"
-                    android:src="@drawable/ic_praise" />
+            <!--                <TextView-->
+            <!--                    android:id="@+id/tv_collect_count"-->
+            <!--                    android:layout_width="wrap_content"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:layout_alignTop="@id/icon_collect"-->
+            <!--                    android:layout_toEndOf="@id/icon_collect"-->
+            <!--                    android:text="9"-->
+            <!--                    android:textColor="@color/colorBlack"-->
+            <!--                    android:textSize="10sp"-->
+            <!--                    tools:ignore="SmallSp" />-->
 
-                <TextView
-                    android:id="@+id/tv_praise_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@id/icon_praise"
-                    android:layout_toEndOf="@id/icon_praise"
-                    android:text="23"
-                    android:textColor="@color/colorBlack"
-                    android:textSize="10sp"
-                    tools:ignore="SmallSp" />
+            <!--                <ImageView-->
+            <!--                    android:id="@+id/icon_praise"-->
+            <!--                    android:layout_width="wrap_content"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:layout_marginStart="5dp"-->
+            <!--                    android:layout_toEndOf="@id/tv_collect_count"-->
+            <!--                    android:adjustViewBounds="true"-->
+            <!--                    android:maxHeight="20dp"-->
+            <!--                    android:src="@drawable/ic_praise" />-->
 
-                <ImageView
-                    android:id="@+id/icon_comment"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_toEndOf="@id/tv_praise_count"
-                    android:adjustViewBounds="true"
-                    android:maxHeight="20dp"
-                    android:src="@drawable/ic_comment" />
+            <!--                <TextView-->
+            <!--                    android:id="@+id/tv_praise_count"-->
+            <!--                    android:layout_width="wrap_content"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:layout_alignTop="@id/icon_praise"-->
+            <!--                    android:layout_toEndOf="@id/icon_praise"-->
+            <!--                    android:text="23"-->
+            <!--                    android:textColor="@color/colorBlack"-->
+            <!--                    android:textSize="10sp"-->
+            <!--                    tools:ignore="SmallSp" />-->
 
-                <TextView
-                    android:id="@+id/tv_comment_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@id/icon_comment"
-                    android:layout_toEndOf="@id/icon_comment"
-                    android:text="45"
-                    android:textColor="@color/colorBlack"
-                    android:textSize="10sp"
-                    tools:ignore="SmallSp" />
-            </RelativeLayout>
+            <!--                <ImageView-->
+            <!--                    android:id="@+id/icon_comment"-->
+            <!--                    android:layout_width="wrap_content"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:layout_marginStart="5dp"-->
+            <!--                    android:layout_toEndOf="@id/tv_praise_count"-->
+            <!--                    android:adjustViewBounds="true"-->
+            <!--                    android:maxHeight="20dp"-->
+            <!--                    android:src="@drawable/ic_comment" />-->
+
+            <!--                <TextView-->
+            <!--                    android:id="@+id/tv_comment_count"-->
+            <!--                    android:layout_width="wrap_content"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:layout_alignTop="@id/icon_comment"-->
+            <!--                    android:layout_toEndOf="@id/icon_comment"-->
+            <!--                    android:text="45"-->
+            <!--                    android:textColor="@color/colorBlack"-->
+            <!--                    android:textSize="10sp"-->
+            <!--                    tools:ignore="SmallSp" />-->
+            <!--            </RelativeLayout>-->
 
         </RelativeLayout>
 

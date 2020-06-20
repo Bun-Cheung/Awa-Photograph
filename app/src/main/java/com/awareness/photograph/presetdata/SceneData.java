@@ -1,4 +1,4 @@
-package com.awareness.photograph.mockdata;
+package com.awareness.photograph.presetdata;
 
 import com.awareness.photograph.R;
 import com.awareness.photograph.entity.RecommendScene;

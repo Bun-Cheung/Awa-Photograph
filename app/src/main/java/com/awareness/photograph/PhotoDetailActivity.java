@@ -11,7 +11,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.awareness.photograph.adapter.PhotoDetailAdapter;
-import com.awareness.photograph.mockdata.PhotoDetailData;
+import com.awareness.photograph.presetdata.PhotoDetailData;
 
 public class PhotoDetailActivity extends AppCompatActivity {
 

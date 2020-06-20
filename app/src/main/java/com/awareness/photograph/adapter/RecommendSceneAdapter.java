@@ -1,5 +1,7 @@
 package com.awareness.photograph.adapter;
 
+import android.app.Application;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,17 +13,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.awareness.photograph.R;
 import com.awareness.photograph.entity.RecommendScene;
+import com.bumptech.glide.Glide;
 
 import java.util.List;
 
 public class RecommendSceneAdapter extends RecyclerView.Adapter<RecommendSceneAdapter.ViewHolder> {
 
     private List<RecommendScene> sceneList;
+    private Context context;
     private onItemClickListener onItemClickListener;
     private static final int MAX_DISPLAY_COUNT = 999;
 
-    public RecommendSceneAdapter(List<RecommendScene> sceneList) {
+    public RecommendSceneAdapter(Context context, List<RecommendScene> sceneList) {
         this.sceneList = sceneList;
+        this.context = context;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -50,6 +55,10 @@ public class RecommendSceneAdapter extends RecyclerView.Adapter<RecommendSceneAd
         if (onItemClickListener != null) {
             holder.itemView.setOnClickListener(v -> onItemClickListener.onClick(position));
         }
+//        Glide.with(holder.itemView).
+//                load(scene.getImage()).
+//                placeholder(R.drawable.picture1).
+//                into(holder.backgroundImage);
         holder.backgroundImage.setImageResource(scene.getImage());
         holder.sceneName.setText(scene.getSceneName());
         String checkInCountStr;
@@ -70,7 +79,7 @@ public class RecommendSceneAdapter extends RecyclerView.Adapter<RecommendSceneAd
         void onClick(int position);
     }
 
-    public void setOnItemClickListener(RecommendSceneAdapter.onItemClickListener onItemClickListener) {
+    void setOnItemClickListener(RecommendSceneAdapter.onItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 }

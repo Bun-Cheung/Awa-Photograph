@@ -1,8 +1,13 @@
 package com.awareness.photograph.adapter;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -10,13 +15,18 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.awareness.photograph.R;
+import com.awareness.photograph.Utils;
 import com.awareness.photograph.entity.PhotoDetail;
 import com.awareness.photograph.entity.SimpleWeatherInfo;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class PhotoDetailAdapter extends RecyclerView.Adapter<PhotoDetailAdapter.ViewHolder> {
     private List<PhotoDetail> photoDetailList;
+    private onClickCollectionListener onClickCollectionListener;
 
     public PhotoDetailAdapter(List<PhotoDetail> photoDetailList) {
         this.photoDetailList = photoDetailList;
@@ -25,21 +35,19 @@ public class PhotoDetailAdapter extends RecyclerView.Adapter<PhotoDetailAdapter.
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView photoIv;
         TextView dateTv;
+        TextView lightTv;
         TextView weatherTv;
-        TextView siteTv;
-        TextView collectCountTv;
-        TextView praiseCountTv;
-        TextView commentCountTv;
+        TextView latLngTv;
+        ImageButton collectionIb;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             photoIv = itemView.findViewById(R.id.iv_photo);
+            lightTv = itemView.findViewById(R.id.tv_light_intensity);
             dateTv = itemView.findViewById(R.id.tv_date);
             weatherTv = itemView.findViewById(R.id.tv_weather);
-            siteTv = itemView.findViewById(R.id.tv_site);
-            collectCountTv = itemView.findViewById(R.id.tv_collect_count);
-            praiseCountTv = itemView.findViewById(R.id.tv_praise_count);
-            commentCountTv = itemView.findViewById(R.id.tv_comment_count);
+            latLngTv = itemView.findViewById(R.id.tv_lat_lng);
+            collectionIb = itemView.findViewById(R.id.ib_collect);
         }
     }
 
@@ -53,22 +61,60 @@ public class PhotoDetailAdapter extends RecyclerView.Adapter<PhotoDetailAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         PhotoDetail detail = photoDetailList.get(position);
-        holder.photoIv.setImageResource(detail.getPhoto());
-        holder.dateTv.setText(detail.getDate());
-        holder.siteTv.setText(detail.getSite());
-        holder.collectCountTv.setText(String.valueOf(detail.getCollectCount()));
-        holder.praiseCountTv.setText(String.valueOf(detail.getPraiseCount()));
-        holder.commentCountTv.setText(String.valueOf(detail.getCommentCount()));
-
+        Bitmap photoBitmap = decodeImage(holder.itemView.getContext(), detail.getPhotoPath());
+        if (photoBitmap == null) {
+            return;
+        }
+        holder.photoIv.setImageBitmap(photoBitmap);
+        holder.dateTv.setText(Utils.formatTimestamp(detail.getTimestamp()));
+        String lightStr = detail.getLightIntensity() + " lux";
+        holder.lightTv.setText(lightStr);
         SimpleWeatherInfo weatherInfo = detail.getWeatherInfo();
         String weatherStr = weatherInfo.getTemperature() + "℃  " +
                 weatherInfo.getWeather() + "  UV:" + weatherInfo.getUvIndex() +
                 "  WindSpeed:" + weatherInfo.getWindSpeed() + "km/h";
         holder.weatherTv.setText(weatherStr);
+        String latLngStr = "lat:" + detail.getLatitude() + " ,lng:" + detail.getLongitude();
+        holder.latLngTv.setText(latLngStr);
+        if (detail.isCollected()) {
+            holder.collectionIb.setImageResource(R.drawable.ic_collect_fill);
+        }
+        if (onClickCollectionListener != null) {
+            holder.collectionIb.setOnClickListener(v -> {
+                onClickCollectionListener.onClick(v, position);
+            });
+        }
     }
 
     @Override
     public int getItemCount() {
         return photoDetailList.size();
+    }
+
+    public interface onClickCollectionListener {
+        void onClick(View view, int position);
+    }
+
+    public void setOnClickCollectionListener(onClickCollectionListener listener) {
+        this.onClickCollectionListener = listener;
+    }
+
+    private Bitmap decodeImage(Context context, String photoPath) {
+        Bitmap bitmap = null;
+        File photoFile = new File(photoPath);
+        if (photoFile.exists()) {
+            bitmap = BitmapFactory.decodeFile(photoPath);
+        } else {
+            InputStream is = null;
+            try {
+                is = context.getAssets().open(photoPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (is != null) {
+                bitmap = BitmapFactory.decodeStream(is);
+            }
+        }
+        return bitmap;
     }
 }
