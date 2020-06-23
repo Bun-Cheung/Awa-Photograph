@@ -1,16 +1,29 @@
 package com.awareness.photograph.entity;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Embedded;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity
 public class PhotoDetail {
-    private String photoPath;
+    @PrimaryKey
+    @NonNull
+    private String photoPath = "";
     private long timestamp;
+
+    @Embedded
     private SimpleWeatherInfo weatherInfo;
     private double latitude;
     private double longitude;
-    private double lightIntensity;
+    @ColumnInfo(name = "light_intensity")
+    private float lightIntensity;
+    private String label;
     private boolean collected;
 
     public boolean isInfoFilled() {
-        return (photoPath != null && weatherInfo != null && timestamp != 0 && latitude != 0
+        return (weatherInfo != null && timestamp != 0 && latitude != 0
                 && longitude != 0 && lightIntensity != 0);
     }
 
@@ -62,11 +75,19 @@ public class PhotoDetail {
         this.longitude = longitude;
     }
 
-    public double getLightIntensity() {
+    public float getLightIntensity() {
         return lightIntensity;
     }
 
-    public void setLightIntensity(double lightIntensity) {
+    public void setLightIntensity(float lightIntensity) {
         this.lightIntensity = lightIntensity;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

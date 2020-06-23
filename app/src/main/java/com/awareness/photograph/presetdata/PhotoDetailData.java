@@ -19,7 +19,7 @@ public class PhotoDetailData {
         PhotoDetail photo_1_detail = new PhotoDetail();
         photo_1_detail.setTimestamp(System.currentTimeMillis());
         photo_1_detail.setPhotoPath("sample_picture_1.png");
-        photo_1_detail.setCollected(true);
+        photo_1_detail.setCollected(false);
         photo_1_detail.setLatitude(23.233);
         photo_1_detail.setLongitude(113.3332);
         photo_1_detail.setLightIntensity(3800);
@@ -49,9 +49,10 @@ public class PhotoDetailData {
         PhotoDetail photo_3_detail = new PhotoDetail();
         photo_3_detail.setTimestamp(System.currentTimeMillis());
         photo_3_detail.setPhotoPath("sample_picture_3.png");
+        photo_3_detail.setCollected(false);
         photo_3_detail.setLatitude(20.456);
         photo_3_detail.setLongitude(139.1234);
-        photo_3_detail.setLightIntensity(4321.1);
+        photo_3_detail.setLightIntensity(4321);
         photo_3_detail.setWeatherInfo(photo_3_weatherInfo);
 
         PHOTO_DETAIL_LIST.add(photo_1_detail);
@@ -59,7 +60,7 @@ public class PhotoDetailData {
         PHOTO_DETAIL_LIST.add(photo_3_detail);
     }
 
-    public static List<PhotoDetail> getPhotoDetailList() {
+    public static List<PhotoDetail> getPresetData() {
         return PHOTO_DETAIL_LIST;
     }
 }

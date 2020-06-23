@@ -1,9 +1,6 @@
 package com.awareness.photograph.adapter;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +16,6 @@ import com.awareness.photograph.Utils;
 import com.awareness.photograph.entity.PhotoDetail;
 import com.awareness.photograph.entity.SimpleWeatherInfo;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 public class PhotoDetailAdapter extends RecyclerView.Adapter<PhotoDetailAdapter.ViewHolder> {
@@ -61,7 +55,7 @@ public class PhotoDetailAdapter extends RecyclerView.Adapter<PhotoDetailAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         PhotoDetail detail = photoDetailList.get(position);
-        Bitmap photoBitmap = decodeImage(holder.itemView.getContext(), detail.getPhotoPath());
+        Bitmap photoBitmap = Utils.decodeImage(holder.itemView.getContext(), detail.getPhotoPath());
         if (photoBitmap == null) {
             return;
         }
@@ -97,24 +91,5 @@ public class PhotoDetailAdapter extends RecyclerView.Adapter<PhotoDetailAdapter.
 
     public void setOnClickCollectionListener(onClickCollectionListener listener) {
         this.onClickCollectionListener = listener;
-    }
-
-    private Bitmap decodeImage(Context context, String photoPath) {
-        Bitmap bitmap = null;
-        File photoFile = new File(photoPath);
-        if (photoFile.exists()) {
-            bitmap = BitmapFactory.decodeFile(photoPath);
-        } else {
-            InputStream is = null;
-            try {
-                is = context.getAssets().open(photoPath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (is != null) {
-                bitmap = BitmapFactory.decodeStream(is);
-            }
-        }
-        return bitmap;
     }
 }

@@ -9,5 +9,6 @@ public class DemoApplication extends Application {
     public void onCreate() {
         super.onCreate();
         WeatherDescription.init(this);
+        Utils.createNotificationChannel(this);
     }
 }

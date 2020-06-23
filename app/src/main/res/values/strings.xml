@@ -2,6 +2,8 @@
     <string name="app_name">Awa-Photograph</string>
     <string name="default_site_name">Beautiful beach</string>
     <string name="main_title">Awareness Photo</string>
+    <string name="default_unknown">unknown</string>
+    <string name="edit_text_hint">label of this photo(should be unique)</string>
     <string name="celsius">℃</string>
 
     <string name="weather_sunny">Sunny</string>

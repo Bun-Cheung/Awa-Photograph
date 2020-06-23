@@ -2,6 +2,7 @@ package com.awareness.photograph;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
@@ -9,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -20,8 +22,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.awareness.photograph.adapter.PhotoDetailAdapter;
@@ -31,6 +37,11 @@ import com.awareness.photograph.presetdata.PhotoDetailData;
 import com.awareness.photograph.presetdata.WeatherDescription;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.huawei.hms.kit.awareness.Awareness;
+import com.huawei.hms.kit.awareness.barrier.AmbientLightBarrier;
+import com.huawei.hms.kit.awareness.barrier.AwarenessBarrier;
+import com.huawei.hms.kit.awareness.barrier.BarrierUpdateRequest;
+import com.huawei.hms.kit.awareness.barrier.LocationBarrier;
+import com.huawei.hms.kit.awareness.barrier.TimeBarrier;
 import com.huawei.hms.kit.awareness.status.AmbientLightStatus;
 import com.huawei.hms.kit.awareness.status.WeatherStatus;
 import com.huawei.hms.kit.awareness.status.weather.Situation;
@@ -39,7 +50,9 @@ import com.huawei.hms.kit.awareness.status.weather.WeatherSituation;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
     private List<PhotoDetail> mPhotoDetailList;
 
     private RecyclerView mMainPhotoRv;
+    private ProgressBar mProgressBar;
+    private TextView mProcessTv;
     private PhotoDetailAdapter mPhotoDetailAdapter;
 
     @Override
@@ -81,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mPhotoDetailList.clear();
     }
 
     private void initView() {
@@ -107,22 +123,61 @@ public class MainActivity extends AppCompatActivity {
                 shootFab.show();
             }
         });
+        mProgressBar = findViewById(R.id.pb_loading);
+        mProcessTv = findViewById(R.id.tv_loading);
     }
 
     private void fetchData() {
-        mPhotoDetailList = PhotoDetailData.getPhotoDetailList();
+        mPhotoDetailList = PhotoDetailData.getPresetData();
+        List<PhotoDetail> storedList = Utils.getAllFromDB(this);
+        if (storedList.size() == 0) {
+            Log.i(TAG, "no data in db");
+        } else {
+            removeInvalidData(storedList);
+            mPhotoDetailList.addAll(storedList);
+        }
         mPhotoDetailAdapter = new PhotoDetailAdapter(mPhotoDetailList);
         mPhotoDetailAdapter.setOnClickCollectionListener((view, position) -> {
             PhotoDetail photoDetail = mPhotoDetailList.get(position);
             if (photoDetail.isCollected()) {
+                deleteAwarenessBarrier(photoDetail.getLabel());
                 ((ImageButton) view).setImageResource(R.drawable.ic_collect_empty);
                 photoDetail.setCollected(false);
+                Utils.updateDBData(this, photoDetail);
             } else {
-                ((ImageButton) view).setImageResource(R.drawable.ic_collect_fill);
-                photoDetail.setCollected(true);
+                showLabelSettingDialog(view, photoDetail);
             }
         });
         mMainPhotoRv.setAdapter(mPhotoDetailAdapter);
+    }
+
+    private void showLabelSettingDialog(View iconView, PhotoDetail photoDetail) {
+        AlertDialog alertDialog;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Label setting");
+        View view = LayoutInflater.from(this).inflate(R.layout.layout_label_setting, null);
+        builder.setView(view);
+        final EditText editText = view.findViewById(R.id.edit_label);
+        builder.setPositiveButton("OK", null);
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            Log.i(TAG, "cancel collecting");
+        });
+        alertDialog = builder.create();
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String label = editText.getText().toString();
+            if (label.equals("")) {
+                showToast("label cannot be empty.");
+            } else {
+                photoDetail.setLabel(label);
+                ((ImageButton) iconView).setImageResource(R.drawable.ic_collect_fill);
+                photoDetail.setCollected(true);
+                Utils.updateDBData(this, photoDetail);
+                addAwarenessBarrier(photoDetail);
+                alertDialog.dismiss();
+            }
+        });
     }
 
     private void checkLocationPermission() {
@@ -150,24 +205,29 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         boolean permissionDenied = false;
-        if (requestCode == CAMERA_REQUEST_CODE) {
-            for (int result : grantResults) {
-                if (result == PackageManager.PERMISSION_DENIED) {
-                    permissionDenied = true;
-                    Toast.makeText(this, "grant Permission failed", Toast.LENGTH_SHORT).show();
-                    break;
+        switch (requestCode) {
+            case CAMERA_REQUEST_CODE:
+                for (int result : grantResults) {
+                    if (result == PackageManager.PERMISSION_DENIED) {
+                        permissionDenied = true;
+                        Toast.makeText(this, "grant Permission failed", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
                 }
-            }
-            if (!permissionDenied) {
-                dispatchTackPictureIntent();
-            }
-        } else if (requestCode == LOCATION_REQUEST_CODE) {
-            for (int result : grantResults) {
-                if (result == PackageManager.PERMISSION_DENIED) {
-                    Toast.makeText(this, "grant Location Permission failed", Toast.LENGTH_SHORT).show();
-                    break;
+                if (!permissionDenied) {
+                    dispatchTackPictureIntent();
                 }
-            }
+                break;
+            case LOCATION_REQUEST_CODE:
+                for (int result : grantResults) {
+                    if (result == PackageManager.PERMISSION_DENIED) {
+                        Toast.makeText(this, "grant Location Permission failed", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -199,6 +259,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void attachAwarenessInfoToPhoto(String path) {
+        showLoadingView();
         PhotoDetail photoDetail = new PhotoDetail();
         photoDetail.setPhotoPath(path);
         photoDetail.setTimestamp(System.currentTimeMillis());
@@ -211,15 +272,17 @@ public class MainActivity extends AppCompatActivity {
         Awareness.getCaptureClient(this).getLocation()
                 .addOnSuccessListener(locationResponse -> {
                     Location location = locationResponse.getLocation();
-                    photoDetail.setLatitude(Utils.formatDouble(location.getLatitude()));
-                    photoDetail.setLongitude(Utils.formatDouble(location.getLongitude()));
+                    photoDetail.setLatitude(Utils.roundingValue(location.getLatitude()));
+                    photoDetail.setLongitude(Utils.roundingValue(location.getLongitude()));
                     if (photoDetail.isInfoFilled()) {
                         addItemToView(photoDetail);
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "get Location failed");
+                    showToast("get location failed");
                     e.printStackTrace();
+                    hideLoadingView();
                 });
     }
 
@@ -246,7 +309,9 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "get weather failed");
+                    showToast("get weather failed");
                     e.printStackTrace();
+                    hideLoadingView();
                 });
     }
 
@@ -254,19 +319,104 @@ public class MainActivity extends AppCompatActivity {
         Awareness.getCaptureClient(this).getLightIntensity()
                 .addOnSuccessListener(ambientLightResponse -> {
                     AmbientLightStatus status = ambientLightResponse.getAmbientLightStatus();
-                    photoDetail.setLightIntensity(Utils.formatDouble(status.getLightIntensity()));
+                    float lightIntensity = status.getLightIntensity();
+                    photoDetail.setLightIntensity((float) Utils.roundingValue(lightIntensity));
                     if (photoDetail.isInfoFilled()) {
                         addItemToView(photoDetail);
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "get light intensity failed");
+                    showToast("get LightIntensity failed");
                     e.printStackTrace();
+                    hideLoadingView();
                 });
     }
 
     private void addItemToView(PhotoDetail photoDetail) {
+        hideLoadingView();
         mPhotoDetailList.add(photoDetail);
         mPhotoDetailAdapter.notifyItemInserted(mPhotoDetailList.size() - 1);
+        mMainPhotoRv.scrollToPosition(mPhotoDetailList.size() - 1);
+        Utils.insertToDB(this, photoDetail);
+    }
+
+    private void showLoadingView() {
+        mProgressBar.setVisibility(View.VISIBLE);
+        mProcessTv.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoadingView() {
+        mProgressBar.setVisibility(View.GONE);
+        mProcessTv.setVisibility(View.GONE);
+    }
+
+    private void addAwarenessBarrier(PhotoDetail photoDetail) {
+        //construct Barriers according to the condition of photo, and register the Barrier to HMS Awareness Kit
+        //when the condition was matched,notify user to take the photo
+        double radius = 500;
+        long timeOfDuration = 5000;
+        AwarenessBarrier locationBarrier = LocationBarrier.stay(photoDetail.getLatitude(),
+                photoDetail.getLongitude(), radius, timeOfDuration);
+
+        long timeOfDayOfPhoto = Utils.parseTimeOfDay(photoDetail.getTimestamp());
+        long halfHourMillis = 30 * 60 * 1000;
+        long startTimeOfDay = timeOfDayOfPhoto - halfHourMillis;
+        long endTimeOfDay = timeOfDayOfPhoto + halfHourMillis;
+        AwarenessBarrier timeBarrier = TimeBarrier.duringPeriodOfDay(TimeZone.getDefault(), startTimeOfDay, endTimeOfDay);
+
+        float lightIntensity = photoDetail.getLightIntensity();
+        float minLightIntensity = Math.max(0, lightIntensity - 1000);
+        AwarenessBarrier lightBarrier = AmbientLightBarrier.range(minLightIntensity, lightIntensity + 1000);
+
+        AwarenessBarrier combinedBarrier = AwarenessBarrier.and(locationBarrier, timeBarrier, lightBarrier);
+        PendingIntent pendingIntent;
+        Intent intent = new Intent(this, BarrierService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            pendingIntent = PendingIntent.getForegroundService(this, 0, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        } else {
+            pendingIntent = PendingIntent.getService(this, 0, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+        BarrierUpdateRequest request = new BarrierUpdateRequest.Builder()
+                .addBarrier(photoDetail.getLabel(), combinedBarrier, pendingIntent)
+                .build();
+        Awareness.getBarrierClient(this).updateBarriers(request)
+                .addOnSuccessListener(aVoid -> showToast("add Awareness Barrier success"))
+                .addOnFailureListener(e -> {
+                    showToast("add Awareness Barrier failed");
+                    Log.e(TAG, "add barrier failed");
+                    e.printStackTrace();
+                });
+    }
+
+    private void deleteAwarenessBarrier(String label) {
+        BarrierUpdateRequest request = new BarrierUpdateRequest.Builder().deleteBarrier(label).build();
+        Awareness.getBarrierClient(this).updateBarriers(request)
+                .addOnSuccessListener(aVoid -> Log.i(TAG, "delete barrier success"))
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "delete barrier failed");
+                    e.printStackTrace();
+                });
+    }
+
+    private void removeInvalidData(List<PhotoDetail> photoDetailList) {
+        Iterator<PhotoDetail> iterator = photoDetailList.iterator();
+        PhotoDetail photoDetail;
+        while (iterator.hasNext()) {
+            photoDetail = iterator.next();
+            if (Utils.decodeImage(this, photoDetail.getPhotoPath()) == null) {
+                Utils.deleteDBData(this, photoDetail);
+                if (photoDetail.getLabel() != null) {
+                    deleteAwarenessBarrier(photoDetail.getLabel());
+                }
+                iterator.remove();
+            }
+        }
+    }
+
+    private void showToast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }
