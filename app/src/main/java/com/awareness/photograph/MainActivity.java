@@ -13,6 +13,7 @@ import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
 import android.location.Location;
@@ -49,6 +50,7 @@ import com.huawei.hms.kit.awareness.status.weather.WeatherSituation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private final static int REQUEST_IMAGE_CAPTURE = 1;
     private final String TAG = getClass().getSimpleName();
     private String mCurrentPhotoPath;
-    private List<PhotoDetail> mPhotoDetailList;
+    private List<PhotoDetail> mPhotoDetailList = new ArrayList<>();
 
     private RecyclerView mMainPhotoRv;
     private ProgressBar mProgressBar;
@@ -93,12 +95,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mPhotoDetailList.clear();
-    }
-
     private void initView() {
         View decorView = getWindow().getDecorView();
         int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
@@ -128,7 +124,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchData() {
-        mPhotoDetailList = PhotoDetailData.getPresetData();
+        if (mPhotoDetailList.size() == 0) {
+            mPhotoDetailList.addAll(PhotoDetailData.getPresetData());
+        }
         List<PhotoDetail> storedList = Utils.getAllFromDB(this);
         if (storedList.size() == 0) {
             Log.i(TAG, "no data in db");
@@ -262,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
         showLoadingView();
         PhotoDetail photoDetail = new PhotoDetail();
         photoDetail.setPhotoPath(path);
+        photoDetail.setPhoto(Utils.decodeImage(this, path));
         photoDetail.setTimestamp(System.currentTimeMillis());
         attachLocationInfo(photoDetail);
         attachWeatherIfo(photoDetail);
@@ -269,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void attachLocationInfo(PhotoDetail photoDetail) {
+        //get location info
         Awareness.getCaptureClient(this).getLocation()
                 .addOnSuccessListener(locationResponse -> {
                     Location location = locationResponse.getLocation();
@@ -316,6 +316,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void attachLightInfo(PhotoDetail photoDetail) {
+        //get light intensity info
         Awareness.getCaptureClient(this).getLightIntensity()
                 .addOnSuccessListener(ambientLightResponse -> {
                     AmbientLightStatus status = ambientLightResponse.getAmbientLightStatus();
@@ -341,21 +342,14 @@ public class MainActivity extends AppCompatActivity {
         Utils.insertToDB(this, photoDetail);
     }
 
-    private void showLoadingView() {
-        mProgressBar.setVisibility(View.VISIBLE);
-        mProcessTv.setVisibility(View.VISIBLE);
-    }
-
-    private void hideLoadingView() {
-        mProgressBar.setVisibility(View.GONE);
-        mProcessTv.setVisibility(View.GONE);
-    }
-
     private void addAwarenessBarrier(PhotoDetail photoDetail) {
         //construct Barriers according to the condition of photo, and register the Barrier to HMS Awareness Kit
         //when the condition was matched,notify user to take the photo
-        double radius = 500;
+
+        double radius = 300;
         long timeOfDuration = 5000;
+        //When the user enter the area and stays in the area for the specified time period(in this sample is 5000ms)
+        //the barrier status is TRUE.
         AwarenessBarrier locationBarrier = LocationBarrier.stay(photoDetail.getLatitude(),
                 photoDetail.getLongitude(), radius, timeOfDuration);
 
@@ -363,12 +357,16 @@ public class MainActivity extends AppCompatActivity {
         long halfHourMillis = 30 * 60 * 1000;
         long startTimeOfDay = timeOfDayOfPhoto - halfHourMillis;
         long endTimeOfDay = timeOfDayOfPhoto + halfHourMillis;
+        //When the time is in the specified time period of a specified time zone,the Barrier status is TRUE.
+        //In this sample ,if the photo was taken at 16:00, the time period of this TimeBarrier will be set from 15:30 to 16:30.
         AwarenessBarrier timeBarrier = TimeBarrier.duringPeriodOfDay(TimeZone.getDefault(), startTimeOfDay, endTimeOfDay);
 
         float lightIntensity = photoDetail.getLightIntensity();
         float minLightIntensity = Math.max(0, lightIntensity - 1000);
+        //When the illuminance is within the range specified by [min,max),the barrier status is TRUE.
         AwarenessBarrier lightBarrier = AmbientLightBarrier.range(minLightIntensity, lightIntensity + 1000);
 
+        //Integrate barriers by logic AND operation.
         AwarenessBarrier combinedBarrier = AwarenessBarrier.and(locationBarrier, timeBarrier, lightBarrier);
         PendingIntent pendingIntent;
         Intent intent = new Intent(this, BarrierService.class);
@@ -406,17 +404,30 @@ public class MainActivity extends AppCompatActivity {
         PhotoDetail photoDetail;
         while (iterator.hasNext()) {
             photoDetail = iterator.next();
-            if (Utils.decodeImage(this, photoDetail.getPhotoPath()) == null) {
+            Bitmap photo = Utils.decodeImage(this, photoDetail.getPhotoPath());
+            if (photo == null) {
                 Utils.deleteDBData(this, photoDetail);
                 if (photoDetail.getLabel() != null) {
                     deleteAwarenessBarrier(photoDetail.getLabel());
                 }
                 iterator.remove();
             }
+            photoDetail.setPhoto(photo);
         }
     }
 
     private void showToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+
+    private void showLoadingView() {
+        mProgressBar.setVisibility(View.VISIBLE);
+        mProcessTv.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoadingView() {
+        mProgressBar.setVisibility(View.GONE);
+        mProcessTv.setVisibility(View.GONE);
     }
 }

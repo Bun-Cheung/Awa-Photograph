@@ -1,9 +1,12 @@
 package com.awareness.photograph.entity;
 
+import android.graphics.Bitmap;
+
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Embedded;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity
@@ -12,6 +15,8 @@ public class PhotoDetail {
     @NonNull
     private String photoPath = "";
     private long timestamp;
+    @Ignore
+    private Bitmap photo;
 
     @Embedded
     private SimpleWeatherInfo weatherInfo;
@@ -31,7 +36,7 @@ public class PhotoDetail {
         return photoPath;
     }
 
-    public void setPhotoPath(String photoPath) {
+    public void setPhotoPath(@NonNull String photoPath) {
         this.photoPath = photoPath;
     }
 
@@ -89,5 +94,13 @@ public class PhotoDetail {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public Bitmap getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Bitmap photo) {
+        this.photo = photo;
     }
 }

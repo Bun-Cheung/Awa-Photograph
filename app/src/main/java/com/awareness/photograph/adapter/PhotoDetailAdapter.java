@@ -55,9 +55,9 @@ public class PhotoDetailAdapter extends RecyclerView.Adapter<PhotoDetailAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         PhotoDetail detail = photoDetailList.get(position);
-        Bitmap photoBitmap = Utils.decodeImage(holder.itemView.getContext(), detail.getPhotoPath());
+        Bitmap photoBitmap = detail.getPhoto();
         if (photoBitmap == null) {
-            return;
+            photoBitmap = Utils.decodeImage(holder.itemView.getContext(), detail.getPhotoPath());
         }
         holder.photoIv.setImageBitmap(photoBitmap);
         holder.dateTv.setText(Utils.formatTimestamp(detail.getTimestamp()));

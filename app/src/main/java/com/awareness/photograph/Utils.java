@@ -26,8 +26,9 @@ import java.util.Date;
 import java.util.List;
 
 public class Utils {
-    static final String CHANNEL_ID = "Awa-photograph";
     static final String FORE_GROUND_SERVICE_CHANNEL_ID = "Foreground service channel";
+    private static final String CHANNEL_ID = "Awa-photograph";
+    private static final BitmapFactory.Options OPTION = new BitmapFactory.Options();
 
     public static String formatTimestamp(long timestamp) {
         DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
@@ -112,12 +113,11 @@ public class Utils {
 
     public static Bitmap decodeImage(Context context, String photoPath) {
         Bitmap bitmap = null;
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 2;
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        OPTION.inSampleSize = 2;
+        OPTION.inPreferredConfig = Bitmap.Config.RGB_565;
         File photoFile = new File(photoPath);
         if (photoFile.exists()) {
-            bitmap = BitmapFactory.decodeFile(photoPath, options);
+            bitmap = BitmapFactory.decodeFile(photoPath, OPTION);
         } else {
             InputStream is = null;
             try {
